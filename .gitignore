@@ -1,0 +1,77 @@
+﻿# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Python test and tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node.js dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editor and operating system files
+.vscode/
+.idea/
+
+# Local coverage output
+coverage/
+
+# Local frontend environment files
+frontend/.env.local
+frontend/.env.*.local
+
+# Exclude all Supabase files
+supabase/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Local environments and editor settings
+.venv/
+.vscode/
+
+# Local environment secrets
+.env
+.env.*
+!.env.example
+
+# Temporary operating-system files
+.DS_Store
+Thumbs.db
+
+# Ignore generated ML experiment outputs by default
+ml/output/*.csv
+
+# Keep the input and main result for the legacy training workflow
+!ml/output/engineered_features.csv
+!ml/output/anomaly_results.csv
+
+# Ignore generated Python cache files
+__pycache__/
+*.py[cod]
+
+# Exclude unused frontend starter assets and utility
+frontend/src/assets/react.svg
+frontend/src/assets/vite.svg
+frontend/src/utils/replaceScoreBar2.py

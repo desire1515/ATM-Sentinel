@@ -1,0 +1,69 @@
+ATM SENTINEL - SYNTHETIC MALAWI DATASET VALIDATION
+===================================================
+
+Dataset: dataset/atm_transactions_malawi_synthetic.csv
+Records (excluding header): 50,000
+Random seed: 20261012
+Currency: MWK (Malawi Kwacha)
+Data origin: Synthetic demonstration data only; not connected to a real bank.
+Live bank data: No. is_live_bank_data is false for every row.
+ATM locations: Simulated town-level coordinates and zones. These are not
+verified installations and do not identify real ATM sites.
+Accounts: SYN-ACCT identifiers are generated solely for this dataset.
+Labels: The injected labels are demonstration ground truth, not evidence of
+actual fraud. is_anomaly duplicates ground_truth_anomaly in this initial file;
+neither column represents a model prediction.
+
+AUTOMATED VALIDATION
+--------------------
+PASS: exactly 50,000 data records, excluding the header
+PASS: exactly 100 unique stable ATM IDs
+PASS: exactly 2,500 ground-truth anomalies (5% of all records)
+PASS: transaction IDs are unique
+PASS: all required values are present
+PASS: transaction amounts are non-negative, finite MWK values
+PASS: timestamps are valid and date/hour/day/weekend columns agree
+PASS: currency is MWK and anomaly labels agree with the injected type
+PASS: no Turkish city or location labels detected
+PASS: same seed produces byte-for-byte identical CSV content
+
+EXISTING PROJECT SCHEMA AND COMPATIBILITY
+-----------------------------------------
+The preserved original dataset/atm_transactions.csv has these columns:
+atmId, atmName, atmCity, atmAddress, totalBalance,
+numberIncomeTransaction, numberOutcomeTransaction, totalIncome, totalOutcome,
+totalNumberTransaction, day, transactionTime. It is an ATM/time-bucket
+aggregate and remains unchanged as a backup.
+
+The Malawi dataset is transaction-level. The frontend adapter now reads
+frontend/public/data/malawi_anomaly_results.csv, which contains the synthetic
+transaction columns plus distinct model_prediction, model_anomaly_score,
+model_is_anomaly, and model_risk_level outputs. The adapter maps each row to
+one transaction and uses model_is_anomaly for model-facing anomaly views;
+ground_truth_anomaly remains a separate demonstration label.
+
+The model-results generator uses transaction amount and balance, encoded
+transaction hour and weekday, weekend status, and one-hot transaction-type and
+transaction-status fields. It excludes transaction_id, account_id,
+is_anomaly, ground_truth_anomaly, and anomaly_type from model inputs.
+
+If another consumer still requires the original aggregate schema, the mapping
+is not one-to-one and must be defined for its time interval and failure rules:
+* atmId <- atm_id; atmCity <- city; atmAddress <- location.
+* atmName has no direct equivalent; use atm_id as a synthetic display label
+  only if the consumer requires a name.
+* transactionTime <- transaction_datetime; day <- day_of_week.
+* Aggregate rows by atm_id and the explicitly chosen interval (for example,
+  hour); totalNumberTransaction is the transaction count in that interval.
+* numberIncomeTransaction / totalIncome can represent deposit count / amount.
+* numberOutcomeTransaction / totalOutcome can represent withdrawal and
+  transfer counts / amounts. Explicitly decide whether failed attempts count.
+* totalBalance can use a defined synthetic summary such as the last
+  balance_after_mwk in the interval; it is not a reconciled ledger.
+
+GENERATION
+----------
+Run from the project root: python ml/generate_malawi_dataset.py
+The script uses only the Python standard library; pandas is not required.
+It writes this CSV and report to new Malawi-specific paths and leaves the
+existing dataset/atm_transactions.csv untouched.
